@@ -1,8 +1,59 @@
+"use client";
+
 import Image from "next/image";
 
+import { useState } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
+import axios from "axios";
+
 export default function Home() {
+
+  const { data: session } = useSession();
+  const [text, setText] = useState("");
+
+  // Google Drive에 저장
+  const saveToGoogleDrive = async () => {
+    if (!session) {
+      alert("먼저 로그인하세요!");
+      return;
+    }
+    if (!text) {
+      alert("저장할 텍스트를 입력하세요!");
+      return;
+    }
+
+    try {
+      await axios.post("/api/save-to-drive", { text, accessToken: session.accessToken });
+      alert("Google Drive에 저장 완료!");
+    } catch (error) {
+      console.error("Error saving to Google Drive:", error);
+      alert("저장 실패!");
+    }
+  };
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <div className="p-6 text-center">
+        <h1 className="text-2xl font-bold mb-4">Google Drive 텍스트 저장</h1>
+        {session ? (
+          <button onClick={() => signOut()} className="bg-red-500 text-white px-4 py-2 rounded">로그아웃</button>
+        ) : (
+          <button onClick={() => signIn("google")} className="bg-blue-500 text-white px-4 py-2 rounded">Google 로그인</button>
+        )}
+
+        <div className="mt-4">
+          <textarea
+            className="w-full h-40 p-2 border"
+            placeholder="여기에 텍스트를 입력하세요..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <button onClick={saveToGoogleDrive} className="bg-green-500 text-white px-4 py-2 mt-2 rounded">
+            Google Drive에 저장
+          </button>
+        </div>
+      </div>
+
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <Image
           className="dark:invert"
