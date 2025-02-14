@@ -1,10 +1,8 @@
 import { google } from "googleapis";
 
-import { NextApiRequest } from 'next';
-
-export async function POST(req: NextApiRequest) {
+export async function POST(req) {
   try {
-    const { text, accessToken } = req.body;
+    const { text, accessToken } = await req.json();
 
     const auth = new google.auth.OAuth2();
     auth.setCredentials({ access_token: accessToken });
